@@ -1,0 +1,27 @@
+name: join-native
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "native_a.go"
+      - "native_a2.go"
+      - "native_b1.go"
+      - "native_b2.go"
+      - "native_b3.go"
+      - ".github/workflows/join.yml"
+jobs:
+  join:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Join native.go
+        run: cat native_a.go native_a2.go native_b1.go native_b2.go native_b3.go > native.go && wc -l native.go
+      - name: Commit joined file
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add native.go
+          git diff --cached --quiet || git commit -m "Join native.go into one file"
+          git push
